@@ -23,6 +23,9 @@ class LexerError(BaseException):
 
 
 def make_scanner(rules, ignore_whitespace=True):
+    """
+    Turns a list of (regex, token_name) tuples into callbacks re.Scanner
+    """
     handlers = [(reg, make_handler(tag)) for reg,tag in rules]
     if ignore_whitespace:
         handlers.append((r"\s+", None))
@@ -34,12 +37,14 @@ def make_handler(tag):
     return handler
 
 class Lexer(object):
+    """
+    Wrapper for re.Scanner; takes token rules as list of (regex, name) tuples
+      e.g. [("\d+", "NUMBER"), ...]
+    """
     def __init__(self, rules=None):
-        self.rules = rules or RULES_DEFAULT
+        if rules is None:
+            rules = RULES_DEFAULT
         self.scanner = make_scanner(self.rules)
-
-        self.tokens = None
-        self.token = None
 
     def tokenize(self, text):
         tokens, remainder = self.scanner.scan(text)
