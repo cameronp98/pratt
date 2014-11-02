@@ -44,7 +44,7 @@ class Lexer(object):
     def __init__(self, rules=None):
         if rules is None:
             rules = RULES_DEFAULT
-        self.scanner = make_scanner(self.rules)
+        self.scanner = make_scanner(rules)
 
     def tokenize(self, text):
         tokens, remainder = self.scanner.scan(text)
