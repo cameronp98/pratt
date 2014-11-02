@@ -16,9 +16,6 @@ RULES_DEFAULT = [
     (r"[a-zA-Z_]+",         "(identifier)"),
 ]
 
-# global scanner
-scanner = None
-
 Token = namedtuple("Token", ["tag", "val", "pos"])
 
 class LexerError(BaseException):
