@@ -14,7 +14,7 @@ RULES_DEFAULT = [
     (r"0o[0-7]+",           "(oct_literal)"),
     (r"0x[0-9a-f]+",        "(hex_literal)"),
     (r"0b[01]+",            "(bin_literal)"),
-    (r"\d+(?:\d+)?",        "(dec_literal)"), # last so 0x is hex not dec(0)+x
+    (r"\d+(?:\.\d+)?",      "(dec_literal)"), # last so 0x is hex not dec(0)+x
     (r"\"(.+?)\"",          "(str_literal)"),
     (r"[\(\)\[\]\{\}]",     "(parenthesis)"),
     (r"[\;\:\,\.]",         "(separator)"),
