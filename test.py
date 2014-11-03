@@ -10,6 +10,10 @@ class LogicParser(TopDownParser):
         self.symbol("(bin_literal)").nud = lambda self: self
         self.symbol("(end)")
 
+        self.symbol(";")
+        self.symbol(",")
+        self.symbol(":")
+
         self.infix("+", 10)
         self.infix("-", 10)
 
@@ -27,23 +31,51 @@ class LogicParser(TopDownParser):
 
         self.symbol(")")
 
+        # parenthesis
         @self.method(self.symbol("("))
         def nud(self):
             expr = self.parser.expression()
             self.parser.advance(")")
             return expr
 
+        # function call
+        @self.method(self.symbol("("))
+        def led(self, left):
+            if not isinstance(left, self.parser.symbols["(identifier)"]):
+                raise SyntaxError("lvalue for call must be identifier")
+            self.tag = "call"
+            self.arg[0] = left
+            self.arg[1] = []
+            if self.parser.token.tag != ")":
+                self.parser.argument_list(self.arg[1])
+            self.parser.advance(")")
+            return self
+
+        # assignment
         @self.method(self.symbol("=", 80))
         def led(self, left):
             self.arg[0] = left.val
             self.arg[1] = self.parser.expression()
             return self
 
+        # lambda
+        self.symbol(":")
+
+        @self.method(self.symbol("lambda"))
+        def nud(self):
+            self.arg[0] = []
+            if self.parser.token.tag != ":":
+                self.parser.argument_list(self.arg[0])
+            self.parser.advance(":")
+            self.arg[1] = self.parser.expression()
+            return self
+
 
 def main():
     parser = LogicParser()
-    ast = parser.parse("area = pi * r ^ 2")
-    print(ast)
+    while True:
+        ast = parser.parse(input("> "))
+        print(ast)
 
 if __name__ == '__main__':
     main()

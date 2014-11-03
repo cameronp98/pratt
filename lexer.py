@@ -1,18 +1,23 @@
 from collections import namedtuple
 import re
 
-ops = "|".join(map(re.escape, \
-    ("+", "-", "*", "/", "^", "?", ":", "and", "or", "not", "=")))
+def any(*args):
+    return "|".join(map(re.escape, args))
+
+ops = any("+", "-", "*", "/", "^", "?", ":", "and", "or", "not", "=")
+
+kwd = any("lambda", "if", "else")
 
 RULES_DEFAULT = [
-    (r"\d+(?:\d+)?",        "(dec_literal)"),
+    (kwd,                   "(keyword)"),
+    (ops,                   "(operator)"),
     (r"0o[0-7]+",           "(oct_literal)"),
     (r"0x[0-9a-f]+",        "(hex_literal)"),
     (r"0b[01]+",            "(bin_literal)"),
+    (r"\d+(?:\d+)?",        "(dec_literal)"), # last so 0x is hex not dec(0)+x
     (r"\"(.+?)\"",          "(str_literal)"),
     (r"[\(\)\[\]\{\}]",     "(parenthesis)"),
     (r"[\;\:\,\.]",         "(separator)"),
-    (r"{}".format(ops),     "(operator)"),
     (r"[a-zA-Z_]+",         "(identifier)"),
 ]
 

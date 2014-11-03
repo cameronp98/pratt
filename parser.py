@@ -9,9 +9,8 @@ class SymbolBase(object):
 
     def __repr__(self):
         name = self.val or self.tag
-        arg = " ".join(map(str, filter(None, self.arg)))
-        if any(a is not None for a in arg):
-            return "({} {})".format(name, arg)
+        if any(self.arg):
+            return "({} {})".format(name, " ".join(map(str, filter(None, self.arg))))
         return name
 
     def nud(self):
@@ -22,6 +21,9 @@ class SymbolBase(object):
 
 
 class TopDownParser(object):
+    """
+    Basic object-oriented recursive descent Pratt parser
+    """
     def __init__(self):
         self.lexer = lexer.Lexer()
         self.tokens = []
@@ -79,14 +81,17 @@ class TopDownParser(object):
     def expression(self, rbp=0):
         t = self.token
         self.token = self.next()
+        # use the first symbol in the expression as lvalue
         left = t.nud()
         while rbp < self.token.lbp:
             t = self.token
             self.token = self.next()
+            # process the infix operation with `left` as lvalue
             left = t.led(left)
         return left
 
     def parse(self, expr):
+        # start streaming tokens and parse the expression
         self._stream = self._token_stream(expr)
         self.token = self.next()
         return self.expression()
@@ -107,5 +112,13 @@ class TopDownParser(object):
     def advance(self, tag=None):
         if tag and self.token.tag != tag:
             raise SyntaxError("expected '{}' but got '{}'" \
-                .format(tag, self.token.val or token.tag))
+                .format(tag, self.token.val or self.token.tag))
         self.token = self.next()
+        return self.token
+
+    def argument_list(self, accumulator):
+        while True:
+            accumulator.append(self.expression())
+            if self.token.tag != ",":
+                break
+            self.advance(",")
