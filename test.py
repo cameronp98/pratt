@@ -8,11 +8,8 @@ class LogicParser(TopDownParser):
         self.symbol("(hex_literal)").nud = lambda self: self
         self.symbol("(oct_literal)").nud = lambda self: self
         self.symbol("(bin_literal)").nud = lambda self: self
-        self.symbol("(end)")
-
-        self.symbol(";")
-        self.symbol(",")
-        self.symbol(":")
+        self.symbol("(str_literal)").nud = lambda self: self
+        self.symbol("(end)").val = "EOL"
 
         self.infix("+", 10)
         self.infix("-", 10)
@@ -39,7 +36,7 @@ class LogicParser(TopDownParser):
             return expr
 
         # function call
-        @self.method(self.symbol("("))
+        @self.method(self.symbol("(", 100))
         def led(self, left):
             if not isinstance(left, self.parser.symbols["(identifier)"]):
                 raise SyntaxError("lvalue for call must be identifier")
@@ -70,12 +67,28 @@ class LogicParser(TopDownParser):
             self.arg[1] = self.parser.expression()
             return self
 
+        # list
+        self.symbol(",")
+        self.symbol("]")
+
+        @self.method(self.symbol("["))
+        def nud(self):
+            self.tag = "list"
+            self.arg[0] = []
+            if self.parser.token.tag != "]":
+                self.parser.argument_list(self.arg[0])
+            self.parser.advance("]")
+            return self
+
+    def evaluate(self, expr):
+        ast = self.parse(expr)
+        return ast
+
 
 def main():
     parser = LogicParser()
     while True:
-        ast = parser.parse(input("> "))
-        print(ast)
+        print(parser.evaluate(input("> ")))
 
 if __name__ == '__main__':
     main()

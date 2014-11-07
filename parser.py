@@ -33,13 +33,6 @@ class TopDownParser(object):
 
         self._define_symbols()
 
-    def _define_symbols(self):
-        self.symbol("(end)")
-        self.symbol("(identifier)")
-        self.symbol("(operator)")
-        self.symbol("(parenthesis)")
-        self.symbol("(")
-
     def symbol(self, tag, lbp=0):
         try:
             sym = self.symbols[tag]
@@ -103,7 +96,7 @@ class TopDownParser(object):
             elif token.val in self.symbols:
                 yield self.symbols[token.val]()
             else:
-                raise SyntaxError("unrecognized token '{}'".format(token))
+                raise SyntaxError("unrecognized '{}'".format(token))
         yield self.symbols["(end)"]
         
     def next(self):
@@ -112,7 +105,7 @@ class TopDownParser(object):
     def advance(self, tag=None):
         if tag and self.token.tag != tag:
             raise SyntaxError("expected '{}' but got '{}'" \
-                .format(tag, self.token.val or self.token.tag))
+                .format(tag, self.token.tag))
         self.token = self.next()
         return self.token
 
